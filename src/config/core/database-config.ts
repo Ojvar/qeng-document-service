@@ -15,5 +15,6 @@ export default {
         useUnifiedTopology: true,
         useFindAndModify: false,
         useCreateIndex: true,
+        retryWrites: false,
     },
 };
