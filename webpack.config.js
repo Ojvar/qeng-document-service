@@ -1,21 +1,16 @@
 "use strict";
 
 const entries = {
-  scripts: {
-    "scripts/pages/home": "./src/frontend/scripts/pages/home.ts",
-  },
-  styles: {
-    "styles/app": "./src/frontend/styles/app.scss",
-    "styles/pages/home": "./src/frontend/styles/pages/home.scss",
-  },
-  copy: {},
+    scripts: {},
+    styles: {},
+    copy: {},
 };
 
 /* Export */
 module.exports = (env = {}) => {
-  if (env.PRODUCTION) {
-    return require("./webpack/webpack.prod")(env, entries);
-  } else {
-    return require("./webpack/webpack.dev")(env, entries);
-  }
+    if (env.PRODUCTION) {
+        return require("./webpack/webpack.prod")(env, entries);
+    } else {
+        return require("./webpack/webpack.dev")(env, entries);
+    }
 };
