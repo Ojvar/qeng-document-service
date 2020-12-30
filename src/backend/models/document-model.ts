@@ -24,13 +24,13 @@ export interface IDocumentModel extends Document {
     tag: string;
     owner?: Types.ObjectId;
 
-    meta?: DocumentMetaType;
-    attachments?: DocumentAttachmentType;
-
     is_deleted?: {
         deleted_at: Date;
         deleted_by: Types.ObjectId;
     };
+
+    meta?: Array<DocumentMetaType>;
+    attachments?: Array<DocumentAttachmentType>;
 }
 
 /**
@@ -108,11 +108,13 @@ export default class DocumentModel implements IDBModel {
         const schemaDef: SchemaDefinition = {
             tag: {
                 type: String,
+                required: true,
                 trim: true,
             },
 
             owner: {
                 type: Schema.Types.ObjectId,
+                required: true,
             },
 
             meta: [
