@@ -40,8 +40,6 @@ export default class DocumentHelper {
             "Document"
         );
 
-            console.log(doc)
-
         const result = await Document.updateOne(
             {
                 _id: Mongoose.Types.ObjectId(doc.id),
