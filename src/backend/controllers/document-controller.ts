@@ -1,15 +1,19 @@
-import Mongoose from "mongoose";
 import { Request, Response, NextFunction } from "express";
-import { DocumentModelType, IDocumentModel } from "@BE/models/document-model";
-import GlobalData from "@Core/Global/global-data";
 import { ActionResultType } from "@Lib/types/frontend/global/action-result-type";
+import {
+    ArchiveDocumentRequestType,
+    CreateDocumentRequestType,
+} from "@Lib/types/backend/-document-request-types";
+import DocumentHelper from "@BE/helpers/document-helper";
+import { IDocumentModel } from "@BE/models/document-model";
+import { Mongoose } from "mongoose";
 
 /**
  * Document controller
  */
 export default class DocumentController {
     /**
-     * Document/create action
+     * Document/Create action
      * @param req Express.Request Request
      * @param res Express.Response Response
      * @param next Express.NextFunction next function
@@ -19,20 +23,45 @@ export default class DocumentController {
         res: Response,
         next: NextFunction
     ): Promise<void> {
-        console.log(req.body);
+        const documentData: CreateDocumentRequestType = req.body as CreateDocumentRequestType;
 
-        // const Document: DocumentModelType = GlobalData.dbEngine.model(
-        //     "Document"
-        // );
+        /* TODO: VALIDATE */
 
-        // Document.create({
-        //     tag: "Test-Tag",
-        //     owner: new Mongoose.Types.ObjectId(),
-        // } as IDocumentModel);
+        /* Create new document */
+        const newDoc: IDocumentModel = await DocumentHelper.createDocument(
+            documentData
+        );
 
         res.send({
             success: true,
-            data: "ok",
+            data: { id: newDoc._id },
+        } as ActionResultType).end();
+    }
+
+    /**
+     * Document/Archive action
+     * @param req Express.Request Request
+     * @param res Express.Response Response
+     * @param next Express.NextFunction next function
+     */
+    public async archive(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        const documentData: ArchiveDocumentRequestType = req.body as ArchiveDocumentRequestType;
+        documentData.id = req.params.id;
+
+        /* TODO: VALIDATE */
+
+        /* Archive an existing document */
+        const result: IDocumentModel = await DocumentHelper.archiveDocument(
+            documentData
+        );
+
+        res.send({
+            success: true,
+            data: result,
         } as ActionResultType).end();
     }
 }

@@ -24,5 +24,11 @@ export default class DocumentRoute extends BaseRouter {
             [controller.create.bind(controller)],
             "document.create"
         );
+
+        super.del(
+            "/:id",
+            [controller.archive.bind(controller)],
+            "document.archive"
+        );
     }
 }

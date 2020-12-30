@@ -21,7 +21,7 @@ export type DocumentModelType = Model<IDocumentModel>;
  * Document model interface
  */
 export interface IDocumentModel extends Document {
-    tag: string;
+    category: string;
     owner?: Types.ObjectId;
 
     is_deleted?: {
@@ -106,7 +106,7 @@ export default class DocumentModel implements IDBModel {
      */
     public getSchema(): Schema {
         const schemaDef: SchemaDefinition = {
-            tag: {
+            category: {
                 type: String,
                 required: true,
                 trim: true,
@@ -115,6 +115,19 @@ export default class DocumentModel implements IDBModel {
             owner: {
                 type: Schema.Types.ObjectId,
                 required: true,
+            },
+
+            is_deleted: {
+                _id: false,
+                required: false,
+                deleted_at: {
+                    type: Date,
+                    required: true,
+                },
+                deleted_by: {
+                    type: Schema.Types.ObjectId,
+                    required: true,
+                },
             },
 
             meta: [
@@ -158,7 +171,7 @@ export default class DocumentModel implements IDBModel {
 
         /* Create index */
         schema.index({
-            tag: 1,
+            category: 1,
             owner: 1,
         });
 
