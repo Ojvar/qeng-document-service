@@ -1,10 +1,15 @@
 import * as Mongoose from "mongoose";
-import { DocumentModelType, IDocumentModel } from "@BE/models/document-model";
+import {
+    DocumentMetaType,
+    DocumentModelType,
+    IDocumentModel,
+} from "@BE/models/document-model";
 import GlobalData from "@Core/Global/global-data";
 import {
+    AddDocumentMetaRequestType,
     ArchiveDocumentRequestType,
     CreateDocumentRequestType,
-} from "@Lib/types/backend/-document-request-types";
+} from "@Lib/types/backend/document-request-types";
 
 /**
  * Document Helper class
@@ -12,7 +17,7 @@ import {
 export default class DocumentHelper {
     /**
      * Create a new document
-     * @param doc IDocumentModel newDocument data
+     * @param doc CreateDocumentRequestType newDocument data
      */
     public static async createDocument(
         doc: CreateDocumentRequestType
@@ -27,12 +32,13 @@ export default class DocumentHelper {
         } as IDocumentModel;
 
         const result: IDocumentModel = await Document.create(newDoc);
+
         return result;
     }
 
     /**
      * Archive an existing document
-     * @param doc IDocumentModel newDocument data
+     * @param doc ArchiveDocumentRequestType newDocument data
      */
     public static async archiveDocument(
         doc: ArchiveDocumentRequestType
@@ -51,6 +57,36 @@ export default class DocumentHelper {
                         deleted_at: new Date(),
                         deleted_by: Mongoose.Types.ObjectId(doc.userId),
                     },
+                },
+            }
+        );
+
+        return result;
+    }
+
+    /**
+     * Add new-meta data to an existing document
+     * @param doc AddDocumentMetaRequestType newDocument data
+     */
+    public static async addMeta(
+        doc: AddDocumentMetaRequestType
+    ): Promise<IDocumentModel> {
+        const Document: DocumentModelType = GlobalData.dbEngine.model(
+            "Document"
+        );
+
+        const result = await Document.updateOne(
+            {
+                _id: Mongoose.Types.ObjectId(doc.id),
+            },
+            {
+                $push: {
+                    meta: {
+                        key: doc.key,
+                        value: doc.value,
+                        created_by: Mongoose.Types.ObjectId(doc.createdBy),
+                        created_at: new Date(),
+                    } as DocumentMetaType,
                 },
             }
         );

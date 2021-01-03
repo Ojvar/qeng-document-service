@@ -40,6 +40,9 @@ export type DocumentMetaType = {
     key: string;
     value: object;
 
+    created_at: Date;
+    created_by: Types.ObjectId;
+
     is_deleted?: {
         deleted_at: Date;
         deleted_by: Types.ObjectId;
@@ -136,6 +139,14 @@ export default class DocumentModel implements IDBModel {
                     value: {
                         type: Object,
                     },
+                    created_at: {
+                        type: Date,
+                        required: true,
+                    },
+                    created_by: {
+                        type: Schema.Types.ObjectId,
+                        required: true,
+                    },
                 },
             ],
 
@@ -151,6 +162,11 @@ export default class DocumentModel implements IDBModel {
                     },
                     created_at: {
                         type: Date,
+                        required: true,
+                    },
+                    created_by: {
+                        type: Schema.Types.ObjectId,
+                        required: true,
                     },
                     tags: [String],
                 },

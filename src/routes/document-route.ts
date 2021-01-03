@@ -30,5 +30,11 @@ export default class DocumentRoute extends BaseRouter {
             [controller.archive.bind(controller)],
             "document.archive"
         );
+
+        super.patch(
+            "/:id/meta",
+            [controller.addMeta.bind(controller)],
+            "document.meta.add"
+        );
     }
 }

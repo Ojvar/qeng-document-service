@@ -15,3 +15,13 @@ export type ArchiveDocumentRequestType = {
     id: string;
     userId: string;
 };
+
+/**
+ * Add document-meta request type
+ */
+export type AddDocumentMetaRequestType = {
+    id: string;
+    key: string;
+    value: object;
+    createdBy: string;
+};
