@@ -1,13 +1,13 @@
 import { AttributeNames, ErrorMessages, Rules, Validator } from "validatorjs";
 import IValidator from "@Lib/interfaces/frontend/validators/validator-interface";
-import { UserLoginType } from "@Lib/types/frontend/auth/user-login-type";
 import { ActionResultType } from "@Lib/types/frontend/global/action-result-type";
-import BaseValidator from "../base-validator";
+import BaseValidator from "@FE/validators/base-validator";
+import { CreateDocumentRequestType } from "@Lib/types/backend/-document-request-types";
 
 /**
  * Validator of UserLogin
  */
-export default class LoginDataValidator
+export default class CreateDocumentValidator
     extends BaseValidator
     implements IValidator {
     /**
@@ -15,8 +15,8 @@ export default class LoginDataValidator
      */
     public getRules<T>(data?: T): Rules {
         return {
-            nationalId: "required|size:10",
-            password: "required|min:6|max:50",
+            category: "required|min:1|max:50",
+            owner: "required|size:24",
         } as Rules;
     }
 
@@ -24,19 +24,14 @@ export default class LoginDataValidator
      * Get error mesages
      */
     public getMessages<T>(data?: T): ErrorMessages {
-        return {
-            required: "Field :attribute should has a value",
-        } as ErrorMessages;
+        return {} as ErrorMessages;
     }
 
     /**
      * Setup attribute names
      */
     public getAttributes<T>(data?: T): AttributeNames {
-        return {
-            nationalId: "Nationa ID",
-            password: "Password",
-        } as AttributeNames;
+        return {} as AttributeNames;
     }
 
     /**
@@ -50,7 +45,7 @@ export default class LoginDataValidator
      * Validate data
      * @param data Input data
      */
-    public validate(data: UserLoginType): ActionResultType {
-        return super.validateData<UserLoginType>(this, data);
+    public validate(data: CreateDocumentRequestType): ActionResultType {
+        return super.validateData<CreateDocumentRequestType>(this, data);
     }
 }

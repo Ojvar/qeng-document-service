@@ -1,9 +1,11 @@
+import Mongoose from "mongoose";
+
 /**
  * Create document request type
  */
 export type CreateDocumentRequestType = {
     category: string;
-    owner: string;
+    owner: Mongoose.Types.ObjectId;
 };
 
 /**
