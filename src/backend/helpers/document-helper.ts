@@ -21,11 +21,12 @@ export default class DocumentHelper {
             "Document"
         );
 
-        const result: IDocumentModel = await Document.create({
+        const newDoc = {
             category: doc.category,
             owner: new Mongoose.Types.ObjectId(doc.owner),
-        } as IDocumentModel);
+        } as IDocumentModel;
 
+        const result: IDocumentModel = await Document.create(newDoc);
         return result;
     }
 

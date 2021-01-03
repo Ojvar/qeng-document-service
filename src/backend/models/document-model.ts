@@ -22,7 +22,7 @@ export type DocumentModelType = Model<IDocumentModel>;
  */
 export interface IDocumentModel extends Document {
     category: string;
-    owner?: Types.ObjectId;
+    owner: Types.ObjectId;
 
     is_deleted?: {
         deleted_at: Date;
@@ -118,15 +118,11 @@ export default class DocumentModel implements IDBModel {
             },
 
             is_deleted: {
-                _id: false,
-                required: false,
                 deleted_at: {
                     type: Date,
-                    required: true,
                 },
                 deleted_by: {
                     type: Schema.Types.ObjectId,
-                    required: true,
                 },
             },
 
