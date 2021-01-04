@@ -5,7 +5,7 @@ import Mongoose from "mongoose";
  */
 export type CreateDocumentRequestType = {
     category: string;
-    owner: Mongoose.Types.ObjectId;
+    owner: Mongoose.Types.ObjectId | string;
 };
 
 /**
@@ -13,7 +13,16 @@ export type CreateDocumentRequestType = {
  */
 export type ArchiveDocumentRequestType = {
     id: string;
-    userId: string;
+    userId: Mongoose.Types.ObjectId | string;
+};
+
+/**
+ * ArchiveMeta document request type
+ */
+export type ArchiveDocumentMetaRequestType = {
+    docId: Mongoose.Types.ObjectId | string;
+    metaId: Mongoose.Types.ObjectId | string;
+    userId: Mongoose.Types.ObjectId | string;
 };
 
 /**

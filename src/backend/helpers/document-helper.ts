@@ -7,6 +7,7 @@ import {
 import GlobalData from "@Core/Global/global-data";
 import {
     AddDocumentMetaRequestType,
+    ArchiveDocumentMetaRequestType,
     ArchiveDocumentRequestType,
     CreateDocumentRequestType,
 } from "@Lib/types/backend/document-request-types";
@@ -47,6 +48,8 @@ export default class DocumentHelper {
             "Document"
         );
 
+        doc.userId = Mongoose.Types.ObjectId(doc.userId.toString());
+
         const result = await Document.updateOne(
             {
                 _id: Mongoose.Types.ObjectId(doc.id),
@@ -55,7 +58,7 @@ export default class DocumentHelper {
                 $set: {
                     is_deleted: {
                         deleted_at: new Date(),
-                        deleted_by: Mongoose.Types.ObjectId(doc.userId),
+                        deleted_by: doc.userId,
                     },
                 },
             }
@@ -118,44 +121,95 @@ export default class DocumentHelper {
 
         const curDocument: IDocumentModel | null = (await Document.findOne({
             _id: doc.docId,
+            "meta._id": { $in: [doc.metaId] },
         })) as IDocumentModel;
 
         if (curDocument != null) {
             const index: number = curDocument.meta.findIndex((x: any) =>
                 x._id.equals(doc.metaId?.toString())
             );
+            const metaKey: DocumentMetaType = curDocument.meta[index];
 
-            if (-1 < index) {
-                const metaKey: DocumentMetaType = curDocument.meta[index];
+            /* Add to history list */
+            const historyItem: DocumentMetaType = {
+                _id: metaKey._id,
+                created_at: metaKey.created_at,
+                created_by: metaKey.created_by,
+                key: metaKey.key,
+                value: metaKey.value,
+                is_deleted: {
+                    deleted_at: new Date(),
+                    deleted_by: doc.createdBy,
+                },
+            } as DocumentMetaType;
 
-                /* Add to history list */
-                const historyItem: DocumentMetaType = {
-                    _id: metaKey._id,
-                    created_at: metaKey.created_at,
-                    created_by: metaKey.created_by,
-                    key: metaKey.key,
-                    value: metaKey.value,
-                    is_deleted: {
-                        deleted_at: new Date(),
-                        deleted_by: doc.createdBy,
-                    },
-                } as DocumentMetaType;
+            const metaHistory = curDocument?.meta_history || [];
+            metaHistory.push(historyItem);
 
-                const metaHistory = curDocument?.meta_history || [];
-                metaHistory.push(historyItem);
+            /* Delete old key */
+            curDocument?.meta.splice(index, 1);
+            curDocument?.meta.push({
+                created_at: new Date(),
+                created_by: doc.createdBy,
+                key: doc.key,
+                value: doc.value,
+            } as DocumentMetaType);
 
-                /* Delete old key */
-                curDocument?.meta.splice(index, 1);
-                curDocument?.meta.push({
-                    created_at: new Date(),
-                    created_by: doc.createdBy,
-                    key: doc.key,
-                    value: doc.value,
-                } as DocumentMetaType);
+            curDocument.meta_history = metaHistory;
+            result = await curDocument?.save();
+        }
 
-                curDocument.meta_history = metaHistory;
-                result = await curDocument?.save();
-            }
+        return result;
+    }
+
+    /**
+     * Archive meta data of an existing document
+     * @param doc AddDocumentMetaRequestType newDocument data
+     */
+    public static async archiveDocumentMeta(
+        doc: ArchiveDocumentMetaRequestType
+    ): Promise<IDocumentModel | null> {
+        let result: IDocumentModel | null = null;
+        const Document: DocumentModelType = GlobalData.dbEngine.model(
+            "Document"
+        );
+
+        /* Ensuring of ObjectId data type */
+        doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
+        doc.metaId = Mongoose.Types.ObjectId(doc.metaId?.toString());
+
+        const curDocument: IDocumentModel | null = (await Document.findOne({
+            _id: doc.docId,
+            "meta._id": { $in: [doc.metaId] },
+        })) as IDocumentModel;
+
+        if (curDocument != null) {
+            const index: number = curDocument.meta.findIndex((x: any) =>
+                x._id.equals(doc.metaId?.toString())
+            );
+            const metaKey: DocumentMetaType = curDocument.meta[index];
+
+            /* Add to history list */
+            const historyItem: DocumentMetaType = {
+                _id: metaKey._id,
+                created_at: metaKey.created_at,
+                created_by: metaKey.created_by,
+                key: metaKey.key,
+                value: metaKey.value,
+                is_deleted: {
+                    deleted_at: new Date(),
+                    // deleted_by: doc.createdBy,
+                },
+            } as DocumentMetaType;
+
+            const metaHistory = curDocument?.meta_history || [];
+            metaHistory.push(historyItem);
+            curDocument.meta_history = metaHistory;
+
+            /* Delete old key */
+            curDocument?.meta.splice(index, 1);
+
+            result = await curDocument?.save();
         }
 
         return result;

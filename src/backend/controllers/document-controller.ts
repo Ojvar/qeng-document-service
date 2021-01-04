@@ -4,6 +4,7 @@ import { ActionResultType } from "@Lib/types/frontend/global/action-result-type"
 import {
     AddDocumentMetaRequestType,
     ArchiveDocumentRequestType,
+    ArchiveDocumentMetaRequestType,
     CreateDocumentRequestType,
 } from "@Lib/types/backend/document-request-types";
 import DocumentHelper from "@BE/helpers/document-helper";
@@ -12,6 +13,7 @@ import CreateDocumentValidator from "@BE/validators/document/create-document-val
 import { ValidatorErrorType } from "@Lib/types/frontend/global/validator-error-type";
 import ArchiveDocumentValidator from "@BE/validators/document/archive-document-validator";
 import AddDocumentMetaValidator from "@BE/validators/document/add-document-meta-validator";
+import ArchiveMetaDocumentValidator from "@BE/validators/document/archive-meta-document-validator";
 
 /**
  * Document controller
@@ -211,6 +213,60 @@ export default class DocumentController {
 
         /* Find and update meta-data of an existing document */
         const result: IDocumentModel | null = await DocumentHelper.updateMeta(
+            documentData
+        );
+
+        if (null != result) {
+            res.send({
+                success: true,
+                data: result,
+            } as ActionResultType).end();
+        } else {
+            res.status(500)
+                .send({
+                    success: false,
+                    data: "Internal server error!",
+                } as ActionResultType)
+                .end();
+        }
+    }
+
+    /**
+     * Document/ArchiveMeta action
+     * @param req Express.Request Request
+     * @param res Express.Response Response
+     * @param next Express.NextFunction next function
+     */
+    public async archiveMeta(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        const documentData: ArchiveDocumentMetaRequestType = req.body as ArchiveDocumentMetaRequestType;
+        documentData.docId = req.params.docId;
+        documentData.metaId = req.params.metaId;
+
+        /* Validation */
+        const validator: ArchiveMetaDocumentValidator = new ArchiveMetaDocumentValidator();
+        const validationResult: ActionResultType = validator.validate(
+            documentData
+        );
+
+        if (!validationResult.success) {
+            const error: ValidatorErrorType = validationResult.data as ValidatorErrorType;
+
+            res.status(406)
+                .send({
+                    success: false,
+                    data: error.errors,
+                } as ActionResultType)
+                .end();
+
+            return;
+        }
+
+        /* Archive an existing document */
+        const result: IDocumentModel | null = await DocumentHelper.archiveDocumentMeta(
             documentData
         );
 

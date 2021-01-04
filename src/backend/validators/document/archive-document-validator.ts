@@ -15,7 +15,7 @@ export default class ArchiveDocumentValidator
      */
     public getRules<T>(data?: T): Rules {
         return {
-            id: "required|size:24",
+            id: ["required", "regex:/^[0-9a-f]{24}$/i"],
         } as Rules;
     }
 
