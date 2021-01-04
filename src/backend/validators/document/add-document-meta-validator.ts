@@ -15,10 +15,11 @@ export default class AddDocumentMetaValidator
      */
     public getRules<T>(data?: T): Rules {
         return {
-            id: "required|size:24",
+            docId: ["required", "regex:/^[0-9a-f]{24}$/i"],
+            metaId: ["regex:/^[0-9a-f]{24}$/i"],
             key: "required|max:50",
             value: "required",
-            createdBy: "required|size:24",
+            createdBy: ["required", "regex:/^[0-9a-f]{24}$/i"],
         } as Rules;
     }
 

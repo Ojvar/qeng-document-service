@@ -1,3 +1,4 @@
+import * as Mongoose from "mongoose";
 import { Request, Response, NextFunction } from "express";
 import { ActionResultType } from "@Lib/types/frontend/global/action-result-type";
 import {
@@ -133,7 +134,7 @@ export default class DocumentController {
         next: NextFunction
     ): Promise<void> {
         const documentData: AddDocumentMetaRequestType = req.body as AddDocumentMetaRequestType;
-        documentData.id = req.params.id;
+        documentData.docId = req.params.docId;
 
         /* Validation */
         const validator: AddDocumentMetaValidator = new AddDocumentMetaValidator();
@@ -156,6 +157,60 @@ export default class DocumentController {
 
         /* Add new meta-data to an existing document */
         const result: IDocumentModel = await DocumentHelper.addMeta(
+            documentData
+        );
+
+        if (null != result) {
+            res.send({
+                success: true,
+                data: result,
+            } as ActionResultType).end();
+        } else {
+            res.status(500)
+                .send({
+                    success: false,
+                    data: "Internal server error!",
+                } as ActionResultType)
+                .end();
+        }
+    }
+
+    /**
+     * Document/Update meta data action
+     * @param req Express.Request Request
+     * @param res Express.Response Response
+     * @param next Express.NextFunction next function
+     */
+    public async updateMeta(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        const documentData: AddDocumentMetaRequestType = req.body as AddDocumentMetaRequestType;
+        documentData.docId = Mongoose.Types.ObjectId(req.params.docId);
+        documentData.metaId = Mongoose.Types.ObjectId(req.params.metaId);
+
+        /* Validation */
+        const validator: AddDocumentMetaValidator = new AddDocumentMetaValidator();
+        const validationResult: ActionResultType = validator.validate(
+            documentData
+        );
+
+        if (!validationResult.success) {
+            const error: ValidatorErrorType = validationResult.data as ValidatorErrorType;
+
+            res.status(406)
+                .send({
+                    success: false,
+                    data: error.errors,
+                } as ActionResultType)
+                .end();
+
+            return;
+        }
+
+        /* Find and update meta-data of an existing document */
+        const result: IDocumentModel | null = await DocumentHelper.updateMeta(
             documentData
         );
 

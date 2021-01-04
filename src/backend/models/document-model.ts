@@ -3,6 +3,7 @@ import {
     Schema,
     SchemaDefinition,
     SchemaOptions,
+    SchemaTypeOptions,
     SchemaTimestampsConfig,
     Mongoose,
     Types,
@@ -29,14 +30,16 @@ export interface IDocumentModel extends Document {
         deleted_by: Types.ObjectId;
     };
 
-    meta?: Array<DocumentMetaType>;
-    attachments?: Array<DocumentAttachmentType>;
+    meta: Array<DocumentMetaType>;
+    meta_history: Array<DocumentMetaType>;
+    attachments: Array<DocumentAttachmentType>;
 }
 
 /**
  * DocumentMeta type
  */
 export type DocumentMetaType = {
+    _id: Types.ObjectId;
     key: string;
     value: object;
 
@@ -108,6 +111,62 @@ export default class DocumentModel implements IDBModel {
      * Get model schema
      */
     public getSchema(): Schema {
+        const MetaDef: SchemaDefinition = {
+            value: {
+                type: Object,
+            },
+            key: {
+                type: String,
+                trim: true,
+            },
+            created_at: {
+                type: Date,
+                required: true,
+            },
+            created_by: {
+                type: Schema.Types.ObjectId,
+                required: true,
+            },
+        };
+
+        const MetaHistoryDef: SchemaDefinition = {
+            ...MetaDef,
+            key: {
+                type: String,
+                unique: false,
+                trim: true,
+            },
+        };
+
+        const AttachmentDef: SchemaDefinition = {
+            filename: {
+                type: String,
+                trim: true,
+            },
+            original_name: {
+                type: String,
+                trim: true,
+            },
+            created_at: {
+                type: Date,
+                required: true,
+            },
+            created_by: {
+                type: Schema.Types.ObjectId,
+                required: true,
+            },
+            tags: [String],
+        };
+
+        const DeletedDef: SchemaDefinition = {
+            deleted_at: {
+                type: Date,
+            },
+            deleted_by: {
+                type: Schema.Types.ObjectId,
+            },
+        };
+
         const schemaDef: SchemaDefinition = {
             category: {
                 type: String,
@@ -120,57 +179,10 @@ export default class DocumentModel implements IDBModel {
                 required: true,
             },
 
-            is_deleted: {
-                deleted_at: {
-                    type: Date,
-                },
-                deleted_by: {
-                    type: Schema.Types.ObjectId,
-                },
-            },
-
-            meta: [
-                {
-                    _id: false,
-                    key: {
-                        type: String,
-                        trim: true,
-                    },
-                    value: {
-                        type: Object,
-                    },
-                    created_at: {
-                        type: Date,
-                        required: true,
-                    },
-                    created_by: {
-                        type: Schema.Types.ObjectId,
-                        required: true,
-                    },
-                },
-            ],
-
-            attachments: [
-                {
-                    filename: {
-                        type: String,
-                        trim: true,
-                    },
-                    original_name: {
-                        type: String,
-                        trim: true,
-                    },
-                    created_at: {
-                        type: Date,
-                        required: true,
-                    },
-                    created_by: {
-                        type: Schema.Types.ObjectId,
-                        required: true,
-                    },
-                    tags: [String],
-                },
-            ],
+            is_deleted: DeletedDef,
+            meta: [MetaDef],
+            meta_history: [MetaHistoryDef],
+            attachments: [AttachmentDef],
         };
 
         /* Define schmea */

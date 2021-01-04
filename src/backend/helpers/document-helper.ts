@@ -75,21 +75,88 @@ export default class DocumentHelper {
             "Document"
         );
 
+        /* Ensuring of ObjectId data type */
+        doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
+        doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
+
         const result = await Document.updateOne(
             {
-                _id: Mongoose.Types.ObjectId(doc.id),
+                _id: doc.docId,
+                "meta.key": { $nin: [doc.key] },
             },
             {
                 $push: {
                     meta: {
                         key: doc.key,
                         value: doc.value,
-                        created_by: Mongoose.Types.ObjectId(doc.createdBy),
+                        created_by: doc.createdBy,
                         created_at: new Date(),
                     } as DocumentMetaType,
                 },
             }
         );
+
+        return result;
+    }
+
+    /**
+     * Update meta data of an existing document
+     * @param doc AddDocumentMetaRequestType newDocument data
+     */
+    public static async updateMeta(
+        doc: AddDocumentMetaRequestType
+    ): Promise<IDocumentModel | null> {
+        let result: IDocumentModel | null = null;
+        const Document: DocumentModelType = GlobalData.dbEngine.model(
+            "Document"
+        );
+
+        /* Ensuring of ObjectId data type */
+        doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
+        doc.metaId = Mongoose.Types.ObjectId(doc.metaId?.toString());
+        doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
+
+        const curDocument: IDocumentModel | null = (await Document.findOne({
+            _id: doc.docId,
+        })) as IDocumentModel;
+
+        if (curDocument != null) {
+            const index: number = curDocument.meta.findIndex((x: any) =>
+                x._id.equals(doc.metaId?.toString())
+            );
+
+            if (-1 < index) {
+                const metaKey: DocumentMetaType = curDocument.meta[index];
+
+                /* Add to history list */
+                const historyItem: DocumentMetaType = {
+                    _id: metaKey._id,
+                    created_at: metaKey.created_at,
+                    created_by: metaKey.created_by,
+                    key: metaKey.key,
+                    value: metaKey.value,
+                    is_deleted: {
+                        deleted_at: new Date(),
+                        deleted_by: doc.createdBy,
+                    },
+                } as DocumentMetaType;
+
+                const metaHistory = curDocument?.meta_history || [];
+                metaHistory.push(historyItem);
+
+                /* Delete old key */
+                curDocument?.meta.splice(index, 1);
+                curDocument?.meta.push({
+                    created_at: new Date(),
+                    created_by: doc.createdBy,
+                    key: doc.key,
+                    value: doc.value,
+                } as DocumentMetaType);
+
+                curDocument.meta_history = metaHistory;
+                result = await curDocument?.save();
+            }
+        }
 
         return result;
     }

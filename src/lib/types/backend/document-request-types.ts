@@ -20,8 +20,9 @@ export type ArchiveDocumentRequestType = {
  * Add document-meta request type
  */
 export type AddDocumentMetaRequestType = {
-    id: string;
+    docId: Mongoose.Types.ObjectId | string;
+    metaId?: Mongoose.Types.ObjectId | string;
     key: string;
     value: object;
-    createdBy: string;
+    createdBy: Mongoose.Types.ObjectId | string;
 };
