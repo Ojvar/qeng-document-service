@@ -1,5 +1,6 @@
 import * as Mongoose from "mongoose";
 import {
+    DocumentAttachmentType,
     DocumentMetaType,
     DocumentModelType,
     IDocumentModel,
@@ -10,6 +11,7 @@ import {
     ArchiveDocumentMetaRequestType,
     ArchiveDocumentRequestType,
     CreateDocumentRequestType,
+    UploadAtatchmentRequestType,
 } from "@Lib/types/backend/document-request-types";
 
 /**
@@ -159,7 +161,7 @@ export default class DocumentHelper {
             result = await curDocument?.save();
         }
 
-        return result;
+        return result?._id;
     }
 
     /**
@@ -177,6 +179,7 @@ export default class DocumentHelper {
         /* Ensuring of ObjectId data type */
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
         doc.metaId = Mongoose.Types.ObjectId(doc.metaId?.toString());
+        doc.deletedBy = Mongoose.Types.ObjectId(doc.deletedBy?.toString());
 
         const curDocument: IDocumentModel | null = (await Document.findOne({
             _id: doc.docId,
@@ -198,7 +201,7 @@ export default class DocumentHelper {
                 value: metaKey.value,
                 is_deleted: {
                     deleted_at: new Date(),
-                    // deleted_by: doc.createdBy,
+                    deleted_by: doc.deletedBy,
                 },
             } as DocumentMetaType;
 
@@ -212,6 +215,48 @@ export default class DocumentHelper {
             result = await curDocument?.save();
         }
 
-        return result;
+        return result?._id;
+    }
+
+    /**
+     * Uplaod an attachment to  an existing document
+     * @param doc UploadAtatchmentRequestType newDocument data
+     */
+    public static async uploadAttachment(
+        doc: UploadAtatchmentRequestType
+    ): Promise<IDocumentModel | null> {
+        let result: IDocumentModel | null = null;
+        const Document: DocumentModelType = GlobalData.dbEngine.model(
+            "Document"
+        );
+
+        /* Ensuring of ObjectId data type */
+        doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
+        doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
+
+        const curDocument: IDocumentModel | null = (await Document.findOne({
+            _id: doc.docId,
+        })) as IDocumentModel;
+
+        if (curDocument != null) {
+            const attachments: DocumentAttachmentType[] =
+                curDocument.attachments || [];
+
+            /* Push uploaded file to attachments */
+            const newAttachment: DocumentAttachmentType = {
+                category: doc.category,
+                created_at: new Date(),
+                created_by: doc.createdBy,
+                tags: doc.tags,
+                filename: doc.file?.filename || "",
+                original_name: doc.file?.originalname || "",
+            };
+            attachments.push(newAttachment);
+
+            /* Try to save */
+            result = await curDocument?.save();
+        }
+
+        return result?._id;
     }
 }

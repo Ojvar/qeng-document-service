@@ -58,6 +58,7 @@ export type DocumentMetaType = {
 export type DocumentAttachmentType = {
     filename: string;
     original_name: string;
+    category: string;
     tags?: Array<string>;
 
     created_at: Date;
@@ -131,10 +132,13 @@ export default class DocumentModel implements IDBModel {
 
         const MetaHistoryDef: SchemaDefinition = {
             ...MetaDef,
-            key: {
-                type: String,
-                unique: false,
-                trim: true,
+            is_deleted: {
+                deleted_at: {
+                    type: Date,
+                },
+                deleted_by: {
+                    type: Schema.Types.ObjectId,
+                },
             },
         };
 
@@ -144,6 +148,10 @@ export default class DocumentModel implements IDBModel {
                 trim: true,
             },
             original_name: {
+                type: String,
+                trim: true,
+            },
+            category: {
                 type: String,
                 trim: true,
             },

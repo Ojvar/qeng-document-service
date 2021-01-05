@@ -2,12 +2,12 @@ import { AttributeNames, ErrorMessages, Rules, Validator } from "validatorjs";
 import IValidator from "@Lib/interfaces/frontend/validators/validator-interface";
 import { ActionResultType } from "@Lib/types/frontend/global/action-result-type";
 import BaseValidator from "@FE/validators/base-validator";
-import { ArchiveDocumentMetaRequestType } from "@Lib/types/backend/document-request-types";
+import { UploadAtatchmentRequestType } from "@Lib/types/backend/document-request-types";
 
 /**
- * Validator of ArchiveMetaDocument
+ * Validator of UploadAttachment
  */
-export default class ArchiveMetaDocumentValidator
+export default class UploadAttachmentValidator
     extends BaseValidator
     implements IValidator {
     /**
@@ -16,8 +16,9 @@ export default class ArchiveMetaDocumentValidator
     public getRules<T>(data?: T): Rules {
         return {
             docId: ["required", "regex:/^[0-9a-f]{24}$/i"],
-            metaId: ["required", "regex:/^[0-9a-f]{24}$/i"],
-            deletedBy: ["required", "regex:/^[0-9a-f]{24}$/i"],
+            createdBy: ["required", "regex:/^[0-9a-f]{24}$/i"],
+            category: "required|max:50",
+            file: "required",
         } as Rules;
     }
 
@@ -46,7 +47,7 @@ export default class ArchiveMetaDocumentValidator
      * Validate data
      * @param data Input data
      */
-    public validate(data: ArchiveDocumentMetaRequestType): ActionResultType {
-        return super.validateData<ArchiveDocumentMetaRequestType>(this, data);
+    public validate(data: UploadAtatchmentRequestType): ActionResultType {
+        return super.validateData<UploadAtatchmentRequestType>(this, data);
     }
 }

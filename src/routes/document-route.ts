@@ -48,5 +48,11 @@ export default class DocumentRoute extends BaseRouter {
             [controller.archiveMeta.bind(controller)],
             "document.meta.archive"
         );
+
+        super.post(
+            "/:docId/attachments",
+            [controller.uploadAttachment.bind(controller)],
+            "document.attachments.upload"
+        );
     }
 }

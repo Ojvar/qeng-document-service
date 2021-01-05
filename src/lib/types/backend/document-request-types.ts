@@ -22,7 +22,7 @@ export type ArchiveDocumentRequestType = {
 export type ArchiveDocumentMetaRequestType = {
     docId: Mongoose.Types.ObjectId | string;
     metaId: Mongoose.Types.ObjectId | string;
-    userId: Mongoose.Types.ObjectId | string;
+    deletedBy: Mongoose.Types.ObjectId | string;
 };
 
 /**
@@ -34,4 +34,21 @@ export type AddDocumentMetaRequestType = {
     key: string;
     value: object;
     createdBy: Mongoose.Types.ObjectId | string;
+};
+
+/**
+ * Upload attachment request type
+ */
+export type UploadAtatchmentRequestType = {
+    docId: Mongoose.Types.ObjectId | string;
+    createdBy: Mongoose.Types.ObjectId | string;
+    file: Express.Multer.File | null;
+    category: string;
+    tags: Array<string>;
+    description?: string;
+    fileData?: {
+        originalName: string;
+        fileName: string;
+        size: number;
+    };
 };
