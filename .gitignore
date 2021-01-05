@@ -3,6 +3,7 @@ dist/
 dist/public/
 public/
 .env
+storage/
 private/ssl/*.pem
 
 # Logs
