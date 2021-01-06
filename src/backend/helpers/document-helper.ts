@@ -123,7 +123,12 @@ export default class DocumentHelper {
 
         const curDocument: IDocumentModel | null = (await Document.findOne({
             _id: doc.docId,
-            "meta._id": { $in: [doc.metaId] },
+            meta: {
+                $elemMatch: {
+                    _id: doc.metaId,
+                    is_deleted: null,
+                },
+            },
         })) as IDocumentModel;
 
         if (curDocument != null) {
@@ -161,7 +166,7 @@ export default class DocumentHelper {
             result = await curDocument?.save();
         }
 
-        return result?._id;
+        return result;
     }
 
     /**
@@ -183,7 +188,12 @@ export default class DocumentHelper {
 
         const curDocument: IDocumentModel | null = (await Document.findOne({
             _id: doc.docId,
-            "meta._id": { $in: [doc.metaId] },
+            meta: {
+                $elemMatch: {
+                    _id: doc.metaId,
+                    is_deleted: null,
+                },
+            },
         })) as IDocumentModel;
 
         if (curDocument != null) {
@@ -215,7 +225,7 @@ export default class DocumentHelper {
             result = await curDocument?.save();
         }
 
-        return result?._id;
+        return result;
     }
 
     /**
@@ -257,7 +267,7 @@ export default class DocumentHelper {
             result = await curDocument?.save();
         }
 
-        return result?._id;
+        return result;
     }
 
     /**
@@ -281,7 +291,12 @@ export default class DocumentHelper {
 
         const curDocument: IDocumentModel | null = (await Document.findOne({
             _id: doc.docId,
-            "attachments._id": { $in: [doc.attachmentId] },
+            attachments: {
+                $elemMatch: {
+                    _id: doc.attachmentId,
+                    is_deleted: null,
+                },
+            },
         })) as IDocumentModel;
 
         if (curDocument != null) {
@@ -300,7 +315,7 @@ export default class DocumentHelper {
 
             /* Create new attachment item */
             const newAttachment: DocumentAttachmentType = {
-                category: oldAttachment.category,
+                category: doc.category || oldAttachment.category,
                 created_at: new Date(),
                 created_by: doc.createdBy,
                 tags: doc.tags || oldAttachment.tags,
@@ -314,6 +329,6 @@ export default class DocumentHelper {
             result = await curDocument?.save();
         }
 
-        return result?._id;
+        return result;
     }
 }
