@@ -8,6 +8,7 @@ import {
 import GlobalData from "@Core/Global/global-data";
 import {
     AddDocumentMetaRequestType,
+    ArchiveAtatchmentRequestType,
     ArchiveDocumentMetaRequestType,
     ArchiveDocumentRequestType,
     CreateDocumentRequestType,
@@ -324,6 +325,56 @@ export default class DocumentHelper {
                     doc.file?.originalname || oldAttachment.original_name,
             };
             attachments.push(newAttachment);
+
+            /* Try to save */
+            result = await curDocument?.save();
+        }
+
+        return result;
+    }
+
+    /**
+     * Archive an existing attachment of a document
+     * @param doc ArchiveAtatchmentRequestType newDocument data
+     */
+    public static async archiveAttachment(
+        doc: ArchiveAtatchmentRequestType
+    ): Promise<IDocumentModel | null> {
+        let result: IDocumentModel | null = null;
+        const Document: DocumentModelType = GlobalData.dbEngine.model(
+            "Document"
+        );
+
+        /* Ensuring of ObjectId data type */
+        doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
+        doc.attachmentId = Mongoose.Types.ObjectId(
+            doc.attachmentId?.toString()
+        );
+        doc.deletedBy = Mongoose.Types.ObjectId(doc.deletedBy.toString());
+
+        const curDocument: IDocumentModel | null = (await Document.findOne({
+            _id: doc.docId,
+            attachments: {
+                $elemMatch: {
+                    _id: doc.attachmentId,
+                    is_deleted: null,
+                },
+            },
+        })) as IDocumentModel;
+
+        if (curDocument != null) {
+            const attachments: DocumentAttachmentType[] =
+                curDocument.attachments;
+
+            /* Find and update old attachment */
+            const oldAttachment: DocumentAttachmentType = attachments.find(
+                (x) =>
+                    x._id?.equals(doc.attachmentId as Mongoose.Types.ObjectId)
+            ) as DocumentAttachmentType;
+            oldAttachment.is_deleted = {
+                deleted_at: new Date(),
+                deleted_by: doc.deletedBy,
+            };
 
             /* Try to save */
             result = await curDocument?.save();

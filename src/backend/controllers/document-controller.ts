@@ -7,6 +7,7 @@ import {
     ArchiveDocumentMetaRequestType,
     CreateDocumentRequestType,
     UploadAtatchmentRequestType,
+    ArchiveAtatchmentRequestType,
 } from "@Lib/types/backend/document-request-types";
 import DocumentHelper from "@BE/helpers/document-helper";
 import { IDocumentModel } from "@BE/models/document-model";
@@ -19,6 +20,7 @@ import UploadAttachmentValidator from "@BE/validators/document/upload-attachment
 import multer from "multer";
 import IHash from "@Lib/interfaces/hash-interface";
 import UpdateAttachmentValidator from "@BE/validators/document/update-attachment-validator";
+import ArchiveAttachmentValidator from "@BE/validators/document/archive-attachment-validator";
 
 /**
  * Document controller
@@ -389,6 +391,60 @@ export default class DocumentController {
 
         /* Update an existing document */
         const result: IDocumentModel | null = await DocumentHelper.updateAttachment(
+            documentData
+        );
+
+        if (null != result) {
+            res.send({
+                success: true,
+                data: result,
+            } as ActionResultType).end();
+        } else {
+            res.status(500)
+                .send({
+                    success: false,
+                    data: "Internal server error!",
+                } as ActionResultType)
+                .end();
+        }
+    }
+
+    /**
+     * Document/ArchiveAttachment action
+     * @param req Express.Request Request
+     * @param res Express.Response Response
+     * @param next Express.NextFunction next function
+     */
+    public async archiveAttachment(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        const documentData: ArchiveAtatchmentRequestType = req.body as ArchiveAtatchmentRequestType;
+        documentData.docId = req.params.docId;
+        documentData.attachmentId = req.params.attachmentId;
+
+        /* Validation */
+        const validator: ArchiveAttachmentValidator = new ArchiveAttachmentValidator();
+        const validationResult: ActionResultType = validator.validate(
+            documentData
+        );
+
+        if (!validationResult.success) {
+            const error: ValidatorErrorType = validationResult.data as ValidatorErrorType;
+
+            res.status(406)
+                .send({
+                    success: false,
+                    data: error.errors,
+                } as ActionResultType)
+                .end();
+
+            return;
+        }
+
+        /* Update an existing document */
+        const result: IDocumentModel | null = await DocumentHelper.archiveAttachment(
             documentData
         );
 

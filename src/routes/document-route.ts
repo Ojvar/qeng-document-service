@@ -60,5 +60,11 @@ export default class DocumentRoute extends BaseRouter {
             [controller.updateAttachment.bind(controller)],
             "document.attachments.update"
         );
+
+        super.del(
+            "/:docId/attachments/:attachmentId",
+            [controller.archiveAttachment.bind(controller)],
+            "document.attachments.archive"
+        );
     }
 }

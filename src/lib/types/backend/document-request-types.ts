@@ -53,3 +53,12 @@ export type UploadAtatchmentRequestType = {
         size: number;
     };
 };
+
+/**
+ * ArchiveAttachment request type
+ */
+export type ArchiveAtatchmentRequestType = {
+    docId: Mongoose.Types.ObjectId | string;
+    attachmentId: Mongoose.Types.ObjectId | string;
+    deletedBy: Mongoose.Types.ObjectId | string;
+};
