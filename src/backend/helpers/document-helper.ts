@@ -12,6 +12,7 @@ import {
     ArchiveDocumentMetaRequestType,
     ArchiveDocumentRequestType,
     CreateDocumentRequestType,
+    DownloadAttachmentRequestType,
     UploadAtatchmentRequestType,
 } from "@Lib/types/backend/document-request-types";
 
@@ -379,6 +380,41 @@ export default class DocumentHelper {
             /* Try to save */
             result = await curDocument?.save();
         }
+
+        return result;
+    }
+
+    /**
+     * Download an attachment
+     * @param doc DownloadAttachmentRequestType Document data
+     */
+    public static async getAttachment(
+        doc: DownloadAttachmentRequestType
+    ): Promise<DocumentAttachmentType | undefined> {
+        const Document: DocumentModelType = GlobalData.dbEngine.model(
+            "Document"
+        );
+
+        /* Ensuring of ObjectId data type */
+        doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
+        doc.attachmentId = Mongoose.Types.ObjectId(
+            doc.attachmentId?.toString()
+        );
+
+        const document: IDocumentModel | null = await Document.findOne({
+            _id: doc.docId,
+            attachments: {
+                $elemMatch: {
+                    _id: doc.attachmentId,
+                    is_deleted: null,
+                },
+            },
+        });
+
+        let result: DocumentAttachmentType | undefined;
+        result = document?.attachments.find((x) =>
+            x._id?.equals(doc.attachmentId)
+        );
 
         return result;
     }

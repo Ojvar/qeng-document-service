@@ -22,7 +22,7 @@ export default {
 
     /* bodyParser */
     bodyParser: {
-        limit: process.env.SERVER_REQUEST_MAX_LIMIT || "2mb",
+        limit: process.env.SERVER_REQUEST_MAX_LIMIT || "5mb",
     },
 
     /* Use multer as default */

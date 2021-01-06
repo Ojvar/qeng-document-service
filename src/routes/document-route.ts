@@ -66,5 +66,11 @@ export default class DocumentRoute extends BaseRouter {
             [controller.archiveAttachment.bind(controller)],
             "document.attachments.archive"
         );
+
+        super.get(
+            "/:docId/attachments/:attachmentId",
+            [controller.downloadAttachment.bind(controller)],
+            "document.download-attachment"
+        );
     }
 }

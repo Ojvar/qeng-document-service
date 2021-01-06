@@ -8,19 +8,24 @@ import {
     CreateDocumentRequestType,
     UploadAtatchmentRequestType,
     ArchiveAtatchmentRequestType,
+    DownloadAttachmentRequestType,
 } from "@Lib/types/backend/document-request-types";
 import DocumentHelper from "@BE/helpers/document-helper";
-import { IDocumentModel } from "@BE/models/document-model";
+import {
+    DocumentAttachmentType,
+    IDocumentModel,
+} from "@BE/models/document-model";
 import CreateDocumentValidator from "@BE/validators/document/create-document-validator";
 import { ValidatorErrorType } from "@Lib/types/frontend/global/validator-error-type";
 import ArchiveDocumentValidator from "@BE/validators/document/archive-document-validator";
 import AddDocumentMetaValidator from "@BE/validators/document/add-document-meta-validator";
 import ArchiveMetaDocumentValidator from "@BE/validators/document/archive-meta-document-validator";
 import UploadAttachmentValidator from "@BE/validators/document/upload-attachment-validator";
-import multer from "multer";
-import IHash from "@Lib/interfaces/hash-interface";
 import UpdateAttachmentValidator from "@BE/validators/document/update-attachment-validator";
 import ArchiveAttachmentValidator from "@BE/validators/document/archive-attachment-validator";
+import DownloadAttachmentValidator from "@BE/validators/document/download-attachment-validator";
+import GlobalData from "@Core/Global/global-data";
+import GlobalMethods from "@Core/Global/global-methods";
 
 /**
  * Document controller
@@ -453,6 +458,61 @@ export default class DocumentController {
                 success: true,
                 data: result,
             } as ActionResultType).end();
+        } else {
+            res.status(500)
+                .send({
+                    success: false,
+                    data: "Internal server error!",
+                } as ActionResultType)
+                .end();
+        }
+    }
+
+    /**
+     * Document/DownloadAttachment action
+     * @param req Express.Request Request
+     * @param res Express.Response Response
+     * @param next Express.NextFunction next function
+     */
+    public async downloadAttachment(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        const documentData: DownloadAttachmentRequestType = req.body as DownloadAttachmentRequestType;
+        documentData.docId = req.params.docId;
+        documentData.attachmentId = req.params.attachmentId;
+
+        /* Validation */
+        const validator: DownloadAttachmentValidator = new DownloadAttachmentValidator();
+        const validationResult: ActionResultType = validator.validate(
+            documentData
+        );
+
+        if (!validationResult.success) {
+            const error: ValidatorErrorType = validationResult.data as ValidatorErrorType;
+
+            res.status(406)
+                .send({
+                    success: false,
+                    data: error.errors,
+                } as ActionResultType)
+                .end();
+
+            return;
+        }
+
+        /* Find new document */
+        const attachment:
+            | DocumentAttachmentType
+            | undefined = await DocumentHelper.getAttachment(documentData);
+
+        if (null != attachment) {
+            const filePath: string = GlobalMethods.rPath(
+                "storage/uploads",
+                attachment.filename
+            );
+            res.download(filePath, attachment.original_name);
         } else {
             res.status(500)
                 .send({

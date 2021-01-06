@@ -62,3 +62,11 @@ export type ArchiveAtatchmentRequestType = {
     attachmentId: Mongoose.Types.ObjectId | string;
     deletedBy: Mongoose.Types.ObjectId | string;
 };
+
+/**
+ * DownloadAttachment request type
+ */
+export type DownloadAttachmentRequestType = {
+    docId: Mongoose.Types.ObjectId | string;
+    attachmentId: Mongoose.Types.ObjectId | string;
+};
