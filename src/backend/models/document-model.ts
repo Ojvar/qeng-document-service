@@ -39,7 +39,7 @@ export interface IDocumentModel extends Document {
  * DocumentMeta type
  */
 export type DocumentMetaType = {
-    _id: Types.ObjectId;
+    _id?: Types.ObjectId;
     key: string;
     value: object;
 
@@ -56,6 +56,7 @@ export type DocumentMetaType = {
  * DocumentAttachment type
  */
 export type DocumentAttachmentType = {
+    _id?: Types.ObjectId;
     filename: string;
     original_name: string;
     category: string;
@@ -164,6 +165,14 @@ export default class DocumentModel implements IDBModel {
                 required: true,
             },
             tags: [String],
+            is_deleted: {
+                deleted_at: {
+                    type: Date,
+                },
+                deleted_by: {
+                    type: Schema.Types.ObjectId,
+                },
+            },
         };
 
         const DeletedDef: SchemaDefinition = {

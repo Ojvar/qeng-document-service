@@ -41,6 +41,7 @@ export type AddDocumentMetaRequestType = {
  */
 export type UploadAtatchmentRequestType = {
     docId: Mongoose.Types.ObjectId | string;
+    attachmentId: Mongoose.Types.ObjectId | string | null;
     createdBy: Mongoose.Types.ObjectId | string;
     file: Express.Multer.File | null;
     category: string;

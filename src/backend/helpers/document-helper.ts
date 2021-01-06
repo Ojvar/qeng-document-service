@@ -219,7 +219,7 @@ export default class DocumentHelper {
     }
 
     /**
-     * Uplaod an attachment to  an existing document
+     * Upload an attachment to an existing document
      * @param doc UploadAtatchmentRequestType newDocument data
      */
     public static async uploadAttachment(
@@ -250,6 +250,63 @@ export default class DocumentHelper {
                 tags: doc.tags,
                 filename: doc.file?.filename || "",
                 original_name: doc.file?.originalname || "",
+            };
+            attachments.push(newAttachment);
+
+            /* Try to save */
+            result = await curDocument?.save();
+        }
+
+        return result?._id;
+    }
+
+    /**
+     * Update an existing attachment of a document
+     * @param doc UploadAtatchmentRequestType newDocument data
+     */
+    public static async updateAttachment(
+        doc: UploadAtatchmentRequestType
+    ): Promise<IDocumentModel | null> {
+        let result: IDocumentModel | null = null;
+        const Document: DocumentModelType = GlobalData.dbEngine.model(
+            "Document"
+        );
+
+        /* Ensuring of ObjectId data type */
+        doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
+        doc.attachmentId = Mongoose.Types.ObjectId(
+            doc.attachmentId?.toString()
+        );
+        doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
+
+        const curDocument: IDocumentModel | null = (await Document.findOne({
+            _id: doc.docId,
+            "attachments._id": { $in: [doc.attachmentId] },
+        })) as IDocumentModel;
+
+        if (curDocument != null) {
+            const attachments: DocumentAttachmentType[] =
+                curDocument.attachments;
+
+            /* Find and update old attachment */
+            const oldAttachment: DocumentAttachmentType = attachments.find(
+                (x) =>
+                    x._id?.equals(doc.attachmentId as Mongoose.Types.ObjectId)
+            ) as DocumentAttachmentType;
+            oldAttachment.is_deleted = {
+                deleted_at: new Date(),
+                deleted_by: doc.createdBy,
+            };
+
+            /* Create new attachment item */
+            const newAttachment: DocumentAttachmentType = {
+                category: oldAttachment.category,
+                created_at: new Date(),
+                created_by: doc.createdBy,
+                tags: doc.tags || oldAttachment.tags,
+                filename: doc.file?.filename || oldAttachment.filename,
+                original_name:
+                    doc.file?.originalname || oldAttachment.original_name,
             };
             attachments.push(newAttachment);
 
