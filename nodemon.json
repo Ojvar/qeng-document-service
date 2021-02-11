@@ -1,3 +1,6 @@
 {
-  "ignore": ["public/*", "README"]
+    "watch": ["core", "resources"],
+    "ext": "ts",
+    "ignore": ["dist/", "README", "**/*/.spec.ts"],
+    "exec": "ts-node-dev -P tsconfig.json -r tsconfig-paths/register src/server.ts"
 }

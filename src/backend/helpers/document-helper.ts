@@ -33,6 +33,7 @@ export default class DocumentHelper {
 
         const newDoc = {
             category: doc.category,
+            key: doc.key,
             owner: new Mongoose.Types.ObjectId(doc.owner),
         } as IDocumentModel;
 

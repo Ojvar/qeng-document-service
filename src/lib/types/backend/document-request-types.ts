@@ -5,6 +5,7 @@ import Mongoose from "mongoose";
  */
 export type CreateDocumentRequestType = {
     category: string;
+    key: string;
     owner: Mongoose.Types.ObjectId | string;
 };
 
