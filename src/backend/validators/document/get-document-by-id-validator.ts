@@ -1,13 +1,13 @@
 import { AttributeNames, ErrorMessages, Rules, Validator } from "validatorjs";
 import IValidator from "@Lib/interfaces/frontend/validators/validator-interface";
 import { ActionResultType } from "@Lib/types/frontend/global/action-result-type";
-import { CreateDocumentRequestType } from "@Lib/types/backend/document-request-types";
 import BaseValidator from "@FE/validators/base-validator";
+import { GetDocumentRequestType } from "@Lib/types/backend/document-request-types";
 
 /**
- * Validator of CreateDocument
+ * Validator of GetDocumentById
  */
-export default class CreateDocumentValidator
+export default class GetDocumentByIdValidator
     extends BaseValidator
     implements IValidator {
     /**
@@ -15,9 +15,7 @@ export default class CreateDocumentValidator
      */
     public getRules<T>(data?: T): Rules {
         return {
-            category: "required|min:1|max:50",
-            tag: "min:1|max:50",
-            owner: ["required", "regex:/^[0-9a-f]{24}$/i"],
+            id: ["required", "regex:/^[0-9a-f]{24}$/i"],
         } as Rules;
     }
 
@@ -46,7 +44,7 @@ export default class CreateDocumentValidator
      * Validate data
      * @param data Input data
      */
-    public validate(data: CreateDocumentRequestType): ActionResultType {
-        return super.validateData<CreateDocumentRequestType>(this, data);
+    public validate(data: GetDocumentRequestType): ActionResultType {
+        return super.validateData<GetDocumentRequestType>(this, data);
     }
 }

@@ -19,6 +19,18 @@ export default class DocumentRoute extends BaseRouter {
     private defineRoutes(): void {
         const controller: DocumentController = new DocumentController();
 
+        super.get(
+            "/:id",
+            [controller.getDocumentById.bind(controller)],
+            "document.get-document-by-id"
+        );
+
+        super.get(
+            "/:owner/:category/:tag?",
+            [controller.getDocumentByData.bind(controller)],
+            "document.get-document-by-data"
+        );
+
         super.post(
             "/",
             [controller.create.bind(controller)],

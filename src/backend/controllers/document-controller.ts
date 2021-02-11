@@ -9,6 +9,7 @@ import {
     UploadAtatchmentRequestType,
     ArchiveAtatchmentRequestType,
     DownloadAttachmentRequestType,
+    GetDocumentRequestType,
 } from "@Lib/types/backend/document-request-types";
 import DocumentHelper from "@BE/helpers/document-helper";
 import {
@@ -24,13 +25,122 @@ import UploadAttachmentValidator from "@BE/validators/document/upload-attachment
 import UpdateAttachmentValidator from "@BE/validators/document/update-attachment-validator";
 import ArchiveAttachmentValidator from "@BE/validators/document/archive-attachment-validator";
 import DownloadAttachmentValidator from "@BE/validators/document/download-attachment-validator";
-import GlobalData from "@Core/Global/global-data";
 import GlobalMethods from "@Core/Global/global-methods";
+import GetDocumentByIdValidator from "@BE/validators/document/get-document-by-id-validator";
 
 /**
  * Document controller
  */
 export default class DocumentController {
+    /**
+     * Document/getDocumentById action
+     * @param req Express.Request Request
+     * @param res Express.Response Response
+     * @param next Express.NextFunction next function
+     */
+    public async getDocumentById(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        const documentData: GetDocumentRequestType = {} as GetDocumentRequestType;
+        documentData.id = req.params.id;
+
+        /* Validation */
+        const validator: GetDocumentByIdValidator = new GetDocumentByIdValidator();
+        const validationResult: ActionResultType = validator.validate(
+            documentData
+        );
+        if (!validationResult.success) {
+            const error: ValidatorErrorType = validationResult.data as ValidatorErrorType;
+
+            res.status(406)
+                .send({
+                    success: false,
+                    data: error.errors,
+                } as ActionResultType)
+                .end();
+
+            return;
+        }
+
+        /* Get existing document data */
+        const doc: IDocumentModel | null = await DocumentHelper.getDocumentById(
+            documentData.id
+        );
+
+        if (null != doc) {
+            res.send({
+                success: true,
+                data: doc,
+            } as ActionResultType).end();
+        } else {
+            res.status(500)
+                .send({
+                    success: false,
+                    data: "Internal server error!",
+                } as ActionResultType)
+                .end();
+        }
+    }
+
+    /**
+     * Document/getDocumentBIdyData action
+     * @param req Express.Request Request
+     * @param res Express.Response Response
+     * @param next Express.NextFunction next function
+     */
+    public async getDocumentByData(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        const documentData: CreateDocumentRequestType = {} as CreateDocumentRequestType;
+        documentData.owner = req.params.owner;
+        documentData.category = req.params.category;
+        documentData.tag = req.params.tag;
+
+        /* Validation */
+        const validator: CreateDocumentValidator = new CreateDocumentValidator();
+        const validationResult: ActionResultType = validator.validate(
+            documentData
+        );
+
+        if (!validationResult.success) {
+            const error: ValidatorErrorType = validationResult.data as ValidatorErrorType;
+
+            res.status(406)
+                .send({
+                    success: false,
+                    data: error.errors,
+                } as ActionResultType)
+                .end();
+
+            return;
+        }
+
+        /* Get existing document data */
+        const doc: IDocumentModel | null = await DocumentHelper.getDocumentByData(
+            documentData
+        );
+
+        /* TODO: FILTER RESULT */
+
+        if (null != doc) {
+            res.send({
+                success: true,
+                data: doc,
+            } as ActionResultType).end();
+        } else {
+            res.status(500)
+                .send({
+                    success: false,
+                    data: "Internal server error!",
+                } as ActionResultType)
+                .end();
+        }
+    }
+
     /**
      * Document/Create action
      * @param req Express.Request Request

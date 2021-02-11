@@ -32,12 +32,53 @@ export default class DocumentHelper {
         );
 
         const newDoc = {
-            category: doc.category,
-            key: doc.key,
             owner: new Mongoose.Types.ObjectId(doc.owner),
+            category: doc.category,
+            tag: doc.tag,
         } as IDocumentModel;
 
         const result: IDocumentModel = await Document.create(newDoc);
+
+        return result;
+    }
+
+    /**
+     * Get document data (Search by doc-data)
+     * @param doc CreateDocumentRequestType old-document data
+     */
+    public static async getDocumentByData(
+        doc: CreateDocumentRequestType
+    ): Promise<IDocumentModel | null> {
+        const Document: DocumentModelType = GlobalData.dbEngine.model(
+            "Document"
+        );
+
+        const codition = {
+            owner: new Mongoose.Types.ObjectId(doc.owner),
+            category: doc.category,
+            tag: doc.tag,
+        };
+
+        const result: IDocumentModel | null = await Document.findOne(codition);
+
+        return result;
+    }
+
+    /**
+     * Get document data (Search by id)
+     * @param doc (Mongoose.Types.ObjectId | string) DocuemtnId
+     */
+    public static async getDocumentById(
+        docId: Mongoose.Types.ObjectId | string
+    ): Promise<IDocumentModel | null> {
+        const Document: DocumentModelType = GlobalData.dbEngine.model(
+            "Document"
+        );
+
+        const codition = {
+            _id: Mongoose.Types.ObjectId(docId.toString()),
+        };
+        const result: IDocumentModel | null = await Document.findOne(codition);
 
         return result;
     }

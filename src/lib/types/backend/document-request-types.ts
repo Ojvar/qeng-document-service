@@ -1,12 +1,19 @@
 import Mongoose from "mongoose";
 
 /**
+ * Get document request type
+ */
+export type GetDocumentRequestType = {
+    id: Mongoose.Types.ObjectId | string;
+};
+
+/**
  * Create document request type
  */
 export type CreateDocumentRequestType = {
-    category: string;
-    key: string;
     owner: Mongoose.Types.ObjectId | string;
+    category: string;
+    tag?: string;
 };
 
 /**
@@ -32,9 +39,9 @@ export type ArchiveDocumentMetaRequestType = {
 export type AddDocumentMetaRequestType = {
     docId: Mongoose.Types.ObjectId | string;
     metaId?: Mongoose.Types.ObjectId | string;
+    createdBy: Mongoose.Types.ObjectId | string;
     key: string;
     value: object;
-    createdBy: Mongoose.Types.ObjectId | string;
 };
 
 /**
@@ -52,6 +59,8 @@ export type UploadAtatchmentRequestType = {
         originalName: string;
         fileName: string;
         size: number;
+        encoding: string;
+        mimetype: string;
     };
 };
 
