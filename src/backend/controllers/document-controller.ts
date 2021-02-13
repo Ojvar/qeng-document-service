@@ -1,4 +1,4 @@
-import * as Mongoose from "mongoose";
+import Mongoose from "mongoose";
 import { Request, Response, NextFunction } from "express";
 import { ActionResultType } from "@Lib/types/frontend/global/action-result-type";
 import {
