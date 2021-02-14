@@ -3,7 +3,6 @@ import {
     Schema,
     SchemaDefinition,
     SchemaOptions,
-    SchemaTypeOptions,
     SchemaTimestampsConfig,
     Mongoose,
     Types,
@@ -22,8 +21,9 @@ export type DocumentModelType = Model<IDocumentModel>;
  * Document model interface
  */
 export interface IDocumentModel extends Document {
-    category: string;
     owner: Types.ObjectId;
+    category: string;
+    tag?: string;
 
     is_deleted?: {
         deleted_at: Date;
@@ -164,7 +164,6 @@ export default class DocumentModel implements IDBModel {
                 type: Schema.Types.ObjectId,
                 required: true,
             },
-            tags: [String],
             is_deleted: {
                 deleted_at: {
                     type: Date,
@@ -173,6 +172,7 @@ export default class DocumentModel implements IDBModel {
                     type: Schema.Types.ObjectId,
                 },
             },
+            tags: [String],
         };
 
         const DeletedDef: SchemaDefinition = {
@@ -185,21 +185,25 @@ export default class DocumentModel implements IDBModel {
         };
 
         const schemaDef: SchemaDefinition = {
+            owner: {
+                type: Schema.Types.ObjectId,
+                required: true,
+            },
             category: {
                 type: String,
                 required: true,
                 trim: true,
             },
-
-            owner: {
-                type: Schema.Types.ObjectId,
-                required: true,
+            tag: {
+                type: String,
+                required: false,
+                trim: true,
             },
 
-            is_deleted: DeletedDef,
             meta: [MetaDef],
             meta_history: [MetaHistoryDef],
             attachments: [AttachmentDef],
+            is_deleted: DeletedDef,
         };
 
         /* Define schmea */
@@ -212,8 +216,8 @@ export default class DocumentModel implements IDBModel {
 
         /* Create index */
         schema.index({
-            category: 1,
             owner: 1,
+            category: 1,
         });
 
         /* Return schema */
