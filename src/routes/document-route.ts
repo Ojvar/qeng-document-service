@@ -21,13 +21,13 @@ export default class DocumentRoute extends BaseRouter {
 
         super.post(
             "/",
-            [controller.create.bind(controller)],
+            [controller.createDocument.bind(controller)],
             "document.create"
         );
 
         super.del(
             "/:id",
-            [controller.archive.bind(controller)],
+            [controller.archiveDocument.bind(controller)],
             "document.archive"
         );
 
