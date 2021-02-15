@@ -147,7 +147,7 @@ export default class DocumentController {
      * @param res Express.Response Response
      * @param next Express.NextFunction next function
      */
-    public async create(
+    public async createDocument(
         req: Request,
         res: Response,
         next: NextFunction
@@ -194,12 +194,12 @@ export default class DocumentController {
     }
 
     /**
-     * Document/Archive action
+     * Document/ArchiveDocument action
      * @param req Express.Request Request
      * @param res Express.Response Response
      * @param next Express.NextFunction next function
      */
-    public async archive(
+    public async archiveDocument(
         req: Request,
         res: Response,
         next: NextFunction

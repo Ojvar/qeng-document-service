@@ -26,6 +26,12 @@ export default class DocumentRoute extends BaseRouter {
         );
 
         super.get(
+            "/:docId/attachments/:attachmentId",
+            [controller.downloadAttachment.bind(controller)],
+            "document.download-attachment"
+        );
+
+        super.get(
             "/:owner/:category/:tag?",
             [controller.getDocumentByData.bind(controller)],
             "document.get-document-by-data"
@@ -33,13 +39,13 @@ export default class DocumentRoute extends BaseRouter {
 
         super.post(
             "/",
-            [controller.create.bind(controller)],
+            [controller.createDocument.bind(controller)],
             "document.create"
         );
 
         super.del(
             "/:id",
-            [controller.archive.bind(controller)],
+            [controller.archiveDocument.bind(controller)],
             "document.archive"
         );
 
@@ -77,12 +83,6 @@ export default class DocumentRoute extends BaseRouter {
             "/:docId/attachments/:attachmentId",
             [controller.archiveAttachment.bind(controller)],
             "document.attachments.archive"
-        );
-
-        super.get(
-            "/:docId/attachments/:attachmentId",
-            [controller.downloadAttachment.bind(controller)],
-            "document.download-attachment"
         );
     }
 }
