@@ -15,6 +15,7 @@ import {
     DownloadAttachmentRequestType,
     UploadAtatchmentRequestType,
 } from "@Lib/types/backend/document-request-types";
+import { ActionResultType } from "@Lib/types/frontend/global/action-result-type";
 
 /**
  * Document Helper class
@@ -96,7 +97,7 @@ export default class DocumentHelper {
 
         doc.userId = Mongoose.Types.ObjectId(doc.userId.toString());
 
-        const result = await Document.updateOne(
+        let result = await Document.updateOne(
             {
                 _id: Mongoose.Types.ObjectId(doc.id),
             },
@@ -109,6 +110,11 @@ export default class DocumentHelper {
                 },
             }
         );
+
+        /* Fetch updated data */
+        result = await Document.findOne({
+            _id: Mongoose.Types.ObjectId(doc.id),
+        });
 
         return result;
     }
@@ -128,7 +134,7 @@ export default class DocumentHelper {
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
         doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
 
-        const result = await Document.updateOne(
+        let result = await Document.updateOne(
             {
                 _id: doc.docId,
                 "meta.key": { $nin: [doc.key] },
@@ -144,6 +150,11 @@ export default class DocumentHelper {
                 },
             }
         );
+
+        /* Fetch updated data */
+        result = await Document.findOne({
+            _id: Mongoose.Types.ObjectId(doc.id),
+        });
 
         return result;
     }
