@@ -58,6 +58,8 @@ export type DocumentMetaType = {
 export type DocumentAttachmentType = {
     _id?: Types.ObjectId;
     filename: string;
+    size: number;
+    mime_type: string;
     original_name: string;
     category: string;
     tags?: Array<string>;
@@ -145,6 +147,14 @@ export default class DocumentModel implements IDBModel {
 
         const AttachmentDef: SchemaDefinition = {
             filename: {
+                type: String,
+                trim: true,
+            },
+            size: {
+                type: Number,
+                trim: true,
+            },
+            mime_type: {
                 type: String,
                 trim: true,
             },
