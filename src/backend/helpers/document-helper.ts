@@ -302,6 +302,8 @@ export default class DocumentHelper {
                 created_at: new Date(),
                 created_by: doc.createdBy,
                 tags: doc.tags,
+                size: doc.file?.size || -1,
+                mime_type: doc.file?.mimetype || "",
                 filename: doc.file?.filename || "",
                 original_name: doc.file?.originalname || "",
             };
