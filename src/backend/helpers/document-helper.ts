@@ -20,6 +20,15 @@ import {
  * Document Helper class
  */
 export default class DocumentHelper {
+    private static _documentModel = null;
+    public static get DocumentModel(): any {
+        if (!this._documentModel) {
+            this._documentModel = GlobalData.dbEngine.model("Document");
+        }
+
+        return this._documentModel;
+    }
+
     /**
      * Create a new document
      * @param doc CreateDocumentRequestType newDocument data
@@ -27,17 +36,13 @@ export default class DocumentHelper {
     public static async createDocument(
         doc: CreateDocumentRequestType
     ): Promise<IDocumentModel> {
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
-
         const newDoc = {
             owner: new Mongoose.Types.ObjectId(doc.owner),
             category: doc.category,
             tag: doc.tag,
         } as IDocumentModel;
 
-        const result: IDocumentModel = await Document.create(newDoc);
+        const result: IDocumentModel = await this.DocumentModel.create(newDoc);
 
         return result;
     }
@@ -49,17 +54,16 @@ export default class DocumentHelper {
     public static async getDocumentByData(
         doc: CreateDocumentRequestType
     ): Promise<IDocumentModel | null> {
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
-
-        const codition = {
+        const condition = {
             owner: new Mongoose.Types.ObjectId(doc.owner),
             category: doc.category,
             tag: doc.tag,
         };
 
-        const result: IDocumentModel | null = await Document.findOne(codition);
+        /* Fetch data */
+        const result: IDocumentModel | null = await this.DocumentModel.findOne(
+            condition
+        );
 
         return result;
     }
@@ -71,14 +75,12 @@ export default class DocumentHelper {
     public static async getDocumentById(
         docId: Mongoose.Types.ObjectId | string
     ): Promise<IDocumentModel | null> {
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
-
         const codition = {
             _id: Mongoose.Types.ObjectId(docId.toString()),
         };
-        const result: IDocumentModel | null = await Document.findOne(codition);
+        const result: IDocumentModel | null = await this.DocumentModel.findOne(
+            codition
+        );
 
         return result;
     }
@@ -89,25 +91,26 @@ export default class DocumentHelper {
      */
     public static async archiveDocument(
         doc: ArchiveDocumentRequestType
-    ): Promise<IDocumentModel> {
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
-
+    ): Promise<IDocumentModel | null> {
         doc.userId = Mongoose.Types.ObjectId(doc.userId.toString());
 
-        const result = await Document.updateOne(
-            {
-                _id: Mongoose.Types.ObjectId(doc.id),
-            },
-            {
-                $set: {
-                    is_deleted: {
-                        deleted_at: new Date(),
-                        deleted_by: doc.userId,
-                    },
+        const condition = {
+            _id: Mongoose.Types.ObjectId(doc.id),
+        };
+
+        /* Update data */
+        await this.DocumentModel.updateOne(condition, {
+            $set: {
+                is_deleted: {
+                    deleted_at: new Date(),
+                    deleted_by: doc.userId,
                 },
-            }
+            },
+        });
+
+        /* Fetch document data */
+        let result: IDocumentModel | null = await this.DocumentModel.findOne(
+            condition
         );
 
         return result;
@@ -119,19 +122,18 @@ export default class DocumentHelper {
      */
     public static async addMeta(
         doc: AddDocumentMetaRequestType
-    ): Promise<IDocumentModel> {
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
-
+    ): Promise<IDocumentModel | null> {
         /* Ensuring of ObjectId data type */
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
         doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
 
-        const result = await Document.updateOne(
+        /* Update */
+        await this.DocumentModel.updateOne(
             {
                 _id: doc.docId,
-                "meta.key": { $nin: [doc.key] },
+                "meta.key": {
+                    $nin: [doc.key],
+                },
             },
             {
                 $push: {
@@ -145,6 +147,11 @@ export default class DocumentHelper {
             }
         );
 
+        /* Fetch document data */
+        let result: IDocumentModel | null = await this.DocumentModel.findOne({
+            _id: doc.docId,
+        });
+
         return result;
     }
 
@@ -156,24 +163,23 @@ export default class DocumentHelper {
         doc: AddDocumentMetaRequestType
     ): Promise<IDocumentModel | null> {
         let result: IDocumentModel | null = null;
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
 
         /* Ensuring of ObjectId data type */
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
         doc.metaId = Mongoose.Types.ObjectId(doc.metaId?.toString());
         doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
 
-        const curDocument: IDocumentModel | null = (await Document.findOne({
-            _id: doc.docId,
-            meta: {
-                $elemMatch: {
-                    _id: doc.metaId,
-                    is_deleted: null,
+        const curDocument: IDocumentModel | null = (await this.DocumentModel.findOne(
+            {
+                _id: doc.docId,
+                meta: {
+                    $elemMatch: {
+                        _id: doc.metaId,
+                        is_deleted: null,
+                    },
                 },
-            },
-        })) as IDocumentModel;
+            }
+        )) as IDocumentModel;
 
         if (curDocument != null) {
             const index: number = curDocument.meta.findIndex((x: any) =>
@@ -221,24 +227,23 @@ export default class DocumentHelper {
         doc: ArchiveDocumentMetaRequestType
     ): Promise<IDocumentModel | null> {
         let result: IDocumentModel | null = null;
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
 
         /* Ensuring of ObjectId data type */
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
         doc.metaId = Mongoose.Types.ObjectId(doc.metaId?.toString());
         doc.deletedBy = Mongoose.Types.ObjectId(doc.deletedBy?.toString());
 
-        const curDocument: IDocumentModel | null = (await Document.findOne({
-            _id: doc.docId,
-            meta: {
-                $elemMatch: {
-                    _id: doc.metaId,
-                    is_deleted: null,
+        const curDocument: IDocumentModel | null = (await this.DocumentModel.findOne(
+            {
+                _id: doc.docId,
+                meta: {
+                    $elemMatch: {
+                        _id: doc.metaId,
+                        is_deleted: null,
+                    },
                 },
-            },
-        })) as IDocumentModel;
+            }
+        )) as IDocumentModel;
 
         if (curDocument != null) {
             const index: number = curDocument.meta.findIndex((x: any) =>
@@ -280,17 +285,16 @@ export default class DocumentHelper {
         doc: UploadAtatchmentRequestType
     ): Promise<IDocumentModel | null> {
         let result: IDocumentModel | null = null;
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
 
         /* Ensuring of ObjectId data type */
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
         doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
 
-        const curDocument: IDocumentModel | null = (await Document.findOne({
-            _id: doc.docId,
-        })) as IDocumentModel;
+        const curDocument: IDocumentModel | null = (await this.DocumentModel.findOne(
+            {
+                _id: doc.docId,
+            }
+        )) as IDocumentModel;
 
         if (curDocument != null) {
             const attachments: DocumentAttachmentType[] =
@@ -322,9 +326,6 @@ export default class DocumentHelper {
         doc: UploadAtatchmentRequestType
     ): Promise<IDocumentModel | null> {
         let result: IDocumentModel | null = null;
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
 
         /* Ensuring of ObjectId data type */
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
@@ -333,15 +334,17 @@ export default class DocumentHelper {
         );
         doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
 
-        const curDocument: IDocumentModel | null = (await Document.findOne({
-            _id: doc.docId,
-            attachments: {
-                $elemMatch: {
-                    _id: doc.attachmentId,
-                    is_deleted: null,
+        const curDocument: IDocumentModel | null = (await this.DocumentModel.findOne(
+            {
+                _id: doc.docId,
+                attachments: {
+                    $elemMatch: {
+                        _id: doc.attachmentId,
+                        is_deleted: null,
+                    },
                 },
-            },
-        })) as IDocumentModel;
+            }
+        )) as IDocumentModel;
 
         if (curDocument != null) {
             const attachments: DocumentAttachmentType[] =
@@ -384,9 +387,6 @@ export default class DocumentHelper {
         doc: ArchiveAtatchmentRequestType
     ): Promise<IDocumentModel | null> {
         let result: IDocumentModel | null = null;
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
 
         /* Ensuring of ObjectId data type */
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
@@ -395,15 +395,17 @@ export default class DocumentHelper {
         );
         doc.deletedBy = Mongoose.Types.ObjectId(doc.deletedBy.toString());
 
-        const curDocument: IDocumentModel | null = (await Document.findOne({
-            _id: doc.docId,
-            attachments: {
-                $elemMatch: {
-                    _id: doc.attachmentId,
-                    is_deleted: null,
+        const curDocument: IDocumentModel | null = (await this.DocumentModel.findOne(
+            {
+                _id: doc.docId,
+                attachments: {
+                    $elemMatch: {
+                        _id: doc.attachmentId,
+                        is_deleted: null,
+                    },
                 },
-            },
-        })) as IDocumentModel;
+            }
+        )) as IDocumentModel;
 
         if (curDocument != null) {
             const attachments: DocumentAttachmentType[] =
@@ -433,25 +435,23 @@ export default class DocumentHelper {
     public static async getAttachment(
         doc: DownloadAttachmentRequestType
     ): Promise<DocumentAttachmentType | undefined> {
-        const Document: DocumentModelType = GlobalData.dbEngine.model(
-            "Document"
-        );
-
         /* Ensuring of ObjectId data type */
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
         doc.attachmentId = Mongoose.Types.ObjectId(
             doc.attachmentId?.toString()
         );
 
-        const document: IDocumentModel | null = await Document.findOne({
-            _id: doc.docId,
-            attachments: {
-                $elemMatch: {
-                    _id: doc.attachmentId,
-                    is_deleted: null,
+        const document: IDocumentModel | null = await this.DocumentModel.findOne(
+            {
+                _id: doc.docId,
+                attachments: {
+                    $elemMatch: {
+                        _id: doc.attachmentId,
+                        is_deleted: null,
+                    },
                 },
-            },
-        });
+            }
+        );
 
         let result: DocumentAttachmentType | undefined;
         result = document?.attachments.find((x) =>
