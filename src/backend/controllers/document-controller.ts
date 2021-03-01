@@ -227,7 +227,7 @@ export default class DocumentController {
         }
 
         /* Archive an existing document */
-        const result: IDocumentModel = await DocumentHelper.archiveDocument(
+        const result: IDocumentModel | null = await DocumentHelper.archiveDocument(
             documentData
         );
 
@@ -280,7 +280,7 @@ export default class DocumentController {
         }
 
         /* Add new meta-data to an existing document */
-        const result: IDocumentModel = await DocumentHelper.addMeta(
+        const result: IDocumentModel | null = await DocumentHelper.addMeta(
             documentData
         );
 
