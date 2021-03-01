@@ -94,18 +94,6 @@ export default class DocumentHelper {
     ): Promise<IDocumentModel | null> {
         doc.userId = Mongoose.Types.ObjectId(doc.userId.toString());
 
-<<<<<<< HEAD
-        await Document.updateOne(
-            {
-                _id: Mongoose.Types.ObjectId(doc.id),
-            },
-            {
-                $set: {
-                    is_deleted: {
-                        deleted_at: new Date(),
-                        deleted_by: doc.userId,
-                    },
-=======
         const condition = {
             _id: Mongoose.Types.ObjectId(doc.id),
         };
@@ -116,18 +104,12 @@ export default class DocumentHelper {
                 is_deleted: {
                     deleted_at: new Date(),
                     deleted_by: doc.userId,
->>>>>>> core_dev
                 },
             },
         });
 
-        /* Fetch document data */
-        let result: IDocumentModel | null = await this.DocumentModel.findOne(
-            condition
-        );
-
         /* Fetch updated data */
-        let result = await Document.findOne({
+        let result = await this.DocumentModel.findOne({
             _id: Mongoose.Types.ObjectId(doc.id),
         });
 
@@ -145,12 +127,8 @@ export default class DocumentHelper {
         doc.docId = Mongoose.Types.ObjectId(doc.docId.toString());
         doc.createdBy = Mongoose.Types.ObjectId(doc.createdBy.toString());
 
-<<<<<<< HEAD
-        await Document.updateOne(
-=======
         /* Update */
         await this.DocumentModel.updateOne(
->>>>>>> core_dev
             {
                 _id: doc.docId,
                 "meta.key": {
@@ -169,21 +147,12 @@ export default class DocumentHelper {
             }
         );
 
-<<<<<<< HEAD
-        /* Fetch updated data */
-        let result = await Document.findOne({
-            _id: Mongoose.Types.ObjectId(doc.docId.toHexString()),
-        });
-
-        return result as IDocumentModel;
-=======
         /* Fetch document data */
         let result: IDocumentModel | null = await this.DocumentModel.findOne({
             _id: doc.docId,
         });
 
         return result;
->>>>>>> core_dev
     }
 
     /**
